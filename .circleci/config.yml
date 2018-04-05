@@ -1,8 +1,25 @@
+docker_image: &docker_image
+  docker:
+    - image: circleci/node:8.9.1
+
+install_and_update_dependency: &install_and_update_dependency
+  name: install and update dependency
+  command: |
+    sudo apt-get update -qq
+    npm install
+
+deploy_firebase: &deploy_firebase
+  name: deploy_firebase
+  command: |
+    npm run build
+    sudo npm install firebase-tools -g
+    firebase use ${FIREBASE_PROJECT_ID}
+    firebase deploy --non-interactive --token "${FIREBASE_TOKEN}"
+
 version: 2
 jobs:
   print_something:
-    docker:
-      - image: circleci/node:8.9.1
+    <<: *docker_image
 
     steps:
       - run: 
@@ -10,8 +27,17 @@ jobs:
           command: |
             echo 'hello from the other side'
 
+  deploy:
+    <<: *docker_image
+        
+    steps:
+      - checkout
+      - run: *install_and_update_dependency
+      - run: *deploy_firebase
+
 workflows:
   version: 2
   deploy:
     jobs:
       - print_something
+      - deploy
