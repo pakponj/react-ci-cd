@@ -1,0 +1,17 @@
+version: 2
+jobs:
+  print_something:
+    docker:
+      - image: circleci/node:8.9.1
+
+    steps:
+      - run: 
+          name: hello KU
+          command: |
+            echo 'hello from the other side'
+
+workflows:
+  version: 2
+  deploy:
+    jobs:
+      - print_something
